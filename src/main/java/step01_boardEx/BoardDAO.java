@@ -42,7 +42,10 @@ public class BoardDAO {
 	
 	
 	// 게시글 작성 DAO
-	public void insertBoard(BoardDTO boardDTO) {	
+	public void insertBoard(BoardDTO boardDTO) {
+		
+		// 단위 테스트
+		//System.out.println(boardDTO);
 		
 		try {
 			
@@ -59,15 +62,16 @@ public class BoardDAO {
 			pstmt.setString(5, boardDTO.getContent());
 			pstmt.executeUpdate();
 			
-		} 
-		catch(Exception e) {
+		} catch(Exception e) {
 			e.printStackTrace();
-		} 
-		finally {
+		} finally {
 			getClose();
-		}		
+		}
+		
 	}
 	
+	
+	// 전체 게시글 조회 DAO
 	public ArrayList<BoardDTO> getBoardList() {
 		
 		ArrayList<BoardDTO> boardList = new ArrayList<BoardDTO>();
@@ -75,28 +79,107 @@ public class BoardDAO {
 		try {
 			
 			getConnection();
-			//(참고) SQL Syntax Exception : 쿼리 문법 오류
+								// (참고)SQL Syntax Exception : 쿼리 문법 오류
 			pstmt = conn.prepareStatement("SELECT * FROM BOARD");
 			rs = pstmt.executeQuery();
 			
 			while (rs.next()) {
 				
 				BoardDTO temp = new BoardDTO();
+				//temp.boardId = rs.getLong("BOARD_ID");
 				temp.setBoardId(rs.getLong("BOARD_ID"));
 				temp.setWriter(rs.getString("WRITER"));
 				temp.setSubject(rs.getString("SUBJECT"));
 				temp.setReadCnt(rs.getLong("READ_CNT"));
 				temp.setEnrollDt(rs.getDate("ENROLL_DT"));
+				
 				boardList.add(temp);
+				
 			}
-		} 
-		catch(Exception e) {
+			
+		} catch (Exception e) {
 			e.printStackTrace();
-		} 
-		finally {
+		} finally {
 			getClose();
 		}
-	
+		
+		// 단위테스트
+		//System.out.println(boardList);
+		
 		return boardList;
+	
 	}
+	
+	
+	// 게시글 상세 조회 DAO
+	public BoardDTO getBoardDetail(long boardId){
+		
+		BoardDTO boardDTO = null;
+		
+		try {
+			
+			getConnection();
+			
+			pstmt = conn.prepareStatement("SELECT * FROM BOARD WHERE BOARD_ID = ?");
+			pstmt.setLong(1, boardId);
+			rs = pstmt.executeQuery();
+			
+			if (rs.next()) {
+				boardDTO = new BoardDTO();
+				boardDTO.setBoardId(boardId);
+				boardDTO.setWriter(rs.getString("WRITER"));
+				boardDTO.setEmail(rs.getString("EMAIL"));
+				boardDTO.setSubject(rs.getString("SUBJECT"));
+				boardDTO.setContent(rs.getString("CONTENT"));
+				boardDTO.setReadCnt(rs.getLong("READ_CNT"));
+				boardDTO.setEnrollDt(rs.getDate("ENROLL_DT"));
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			getClose();
+		}
+		
+		// 단위테스트
+		//System.out.println(boardDTO);
+		
+		return boardDTO;
+	
+	}
+	
+	
+	// 유저 인증 DAO
+	public boolean checkAuthorizedUser(BoardDTO boardDTO) {
+		
+		boolean isAuthorizedUser = false;
+		
+		try {
+			
+			getConnection();
+			pstmt = conn.prepareStatement("SELECT * FROM BOARD WHERE BOARD_ID = ? AND PASSWORD = ?");
+			pstmt.setLong(1, boardDTO.getBoardId());
+			pstmt.setString(2, boardDTO.getPassword());
+			rs = pstmt.executeQuery();
+			
+			if (rs.next()) {
+				isAuthorizedUser = true;
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			getClose();
+		}
+		
+		return isAuthorizedUser;
+		
+	}
+	
+	
+	
+	
+	
+	
+	
 }

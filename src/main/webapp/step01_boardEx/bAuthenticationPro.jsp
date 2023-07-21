@@ -34,6 +34,11 @@
 			}
 			else if (menu.equals("delete")) {
 				//삭제화면으로이동
+	%>
+				<script>
+					location.href = "bDelete.jsp?boardId=" + <%=boardId%>;
+				</script>
+	<% 
 			}
 			
 		}
